@@ -4,10 +4,12 @@ body {
     height: 100vh;
     overflow: hidden;
     display: flex;
+    flex-direction: column; /* Allows button to be at bottom easily */
     justify-content: center;
     align-items: center;
     background-color: #1a1a2e; /* Fallback background */
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: white; /* Ensure text is visible on dark background */
 }
 
 /* Animated Bubble Background */
@@ -18,41 +20,46 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    z-index: -1;
+    z-index: -1; /* Ensure it stays behind everything */
 }
 
-.background-container::before {
-    content: '';
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, #9795ef, transparent 60%);
-    border-radius: 50%;
-    top: -100px;
-    left: -100px;
-    animation: moveBubble1 20s infinite alternate;
-}
-
+.background-container::before,
 .background-container::after {
     content: '';
     position: absolute;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, #f9c5d1, transparent 60%);
     border-radius: 50%;
+    filter: blur(80px); /* Soften the bubbles */
+    opacity: 0.6;
+}
+
+.background-container::before {
+    width: 450px;
+    height: 450px;
+    background: radial-gradient(circle, #9795ef, transparent 60%);
+    top: -100px;
+    left: -100px;
+    animation: moveBubble1 20s ease-in-out infinite alternate;
+}
+
+.background-container::after {
+    width: 550px;
+    height: 550px;
+    background: radial-gradient(circle, #f9c5d1, transparent 60%);
     bottom: -150px;
     right: -150px;
-    animation: moveBubble2 25s infinite alternate;
+    animation: moveBubble2 25s ease-in-out infinite alternate;
 }
 
 @keyframes moveBubble1 {
-    from { transform: translate(0, 0) scale(1); }
-    to { transform: translate(200px, 300px) scale(1.2); }
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(250px, 350px) scale(1.2); }
+    100% { transform: translate(0, 0) scale(1); }
 }
 
 @keyframes moveBubble2 {
-    from { transform: translate(0, 0) scale(1.2); }
-    to { transform: translate(-250px, -200px) scale(1); }
+    0% { transform: translate(0, 0) scale(1.2); }
+    50% { transform: translate(-300px, -250px) scale(1); }
+    100% { transform: translate(0, 0) scale(1.2); }
 }
 
 /* 3D Scene and Dice Container */
@@ -60,16 +67,17 @@ body {
     width: 150px;
     height: 150px;
     perspective: 800px;
+    margin-bottom: 80px; /* Space for the button below */
 }
 
 .dice {
     width: 100%;
     height: 100%;
     position: relative;
-    transform-style: preserve-3d; /* <--- THIS IS THE FIX! */
+    transform-style: preserve-3d; /* CORRECTED: preserve-3d */
     transition: transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transform: translateZ(-75px);
-    box-shadow: 10px 15px 40px rgba(0, 0, 0, 0.4);
+    transform: translateZ(-75px); /* Half of dice width to center for perspective */
+    box-shadow: 10px 15px 40px rgba(0, 0, 0, 0.4); /* Shadow for top-right light */
     border-radius: 20px;
 }
 
@@ -84,6 +92,7 @@ body {
     display: grid;
     padding: 15px;
     box-sizing: border-box;
+    backface-visibility: hidden; /* Important for 3D effect */
 }
 
 /* Dot Styling */
@@ -97,23 +106,140 @@ body {
 }
 
 /* CSS Dot Layouts */
+/* Face 1 */
 .face.front { grid-template-areas: ". . ." ". a ." ". . ."; }
 .front .dot:nth-child(1) { grid-area: a; }
 
-.face.left { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
-.left .dot:nth-child(1) { align-self: start; justify-self: start; }
-.left .dot:nth-child(2) { align-self: end; justify-self: end; }
+/* Face 6 */
+.face.back { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr); gap: 15px 20px;}
+.back .dot:nth-child(1) { grid-column: 1; grid-row: 1; }
+.back .dot:nth-child(2) { grid-column: 2; grid-row: 1; }
+.back .dot:nth-child(3) { grid-column: 1; grid-row: 2; }
+.back .dot:nth-child(4) { grid-column: 2; grid-row: 2; }
+.back .dot:nth-child(5) { grid-column: 1; grid-row: 3; }
+.back .dot:nth-child(6) { grid-column: 2; grid-row: 3; }
 
+
+/* Face 3 */
 .face.top { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
 .top .dot:nth-child(1) { grid-area: 1 / 1; }
 .top .dot:nth-child(2) { grid-area: 2 / 2; }
 .top .dot:nth-child(3) { grid-area: 3 / 3; }
 
+/* Face 4 */
 .face.bottom { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 20px;}
+.bottom .dot:nth-child(1) { align-self: start; justify-self: start; }
+.bottom .dot:nth-child(2) { align-self: start; justify-self: end; }
+.bottom .dot:nth-child(3) { align-self: end; justify-self: start; }
+.bottom .dot:nth-child(4) { align-self: end; justify-self: end; }
 
+/* Face 5 */
 .face.right { grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
 .right .dot:nth-child(1) { grid-area: 1 / 1; }
 .right .dot:nth-child(2) { grid-area: 1 / 3; }
 .right .dot:nth-child(3) { grid-area: 2 / 2; }
 .right .dot:nth-child(4) { grid-area: 3 / 1; }
-.right .dot:
+.right .dot:nth-child(5) { grid-area: 3 / 3; }
+
+/* Face 2 */
+.face.left { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.left .dot:nth-child(1) { align-self: start; justify-self: start; }
+.left .dot:nth-child(2) { align-self: end; justify-self: end; }
+
+
+/* Positioning the faces to form a cube */
+/* Transform origin is center of the face, then translated out */
+.front  { transform: rotateY(  0deg) translateZ(75px); }
+.back   { transform: rotateY(180deg) translateZ(75px); }
+.right  { transform: rotateY( 90deg) translateZ(75px); }
+.left   { transform: rotateY(-90deg) translateZ(75px); }
+.top    { transform: rotateX( 90deg) translateZ(75px); }
+.bottom { transform: rotateX(-90deg) translateZ(75px); }
+
+/* iOS "Liquid Glass" Style 'Roll' Button */
+.roll-button {
+    /* Positioning */
+    position: fixed; /* Fixed to viewport */
+    bottom: 40px; /* Distance from bottom */
+    
+    /* Size & Shape */
+    padding: 15px 40px;
+    border-radius: 30px; /* Pill shape */
+    
+    /* Appearance (Liquid Glass) */
+    background: rgba(255, 255, 255, 0.25); /* Translucent white base */
+    border: 1px solid rgba(255, 255, 255, 0.4); /* Frosted border */
+    backdrop-filter: blur(20px); /* Strong blur for liquid effect */
+    -webkit-backdrop-filter: blur(20px); /* For Safari compatibility */
+    box-shadow: 
+        0 4px 10px rgba(0, 0, 0, 0.1), /* Outer shadow */
+        inset 0 1px 0 rgba(255, 255, 255, 0.3), /* Top highlight */
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1); /* Bottom shadow */
+    
+    /* Text */
+    font-size: 20px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9); /* Slightly transparent white text */
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.1); /* Subtle text shadow */
+
+    /* Interactivity */
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    z-index: 10; /* Ensure button is above other elements */
+}
+
+.roll-button:hover {
+    transform: translateY(-2px) scale(1.02); /* Slight lift and scale */
+    background: rgba(255, 255, 255, 0.35); /* More opaque on hover */
+    box-shadow: 
+        0 6px 15px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.roll-button:active {
+    transform: translateY(1px) scale(0.98); /* Press effect */
+    background: rgba(255, 255, 255, 0.2); /* Slightly less opaque on active */
+    box-shadow: 
+        0 2px 5px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* Responsive Design (adjust button and dice size for smaller screens) */
+@media (max-width: 480px) {
+    .scene {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 60px;
+    }
+    .dice {
+        transform: translateZ(-60px); /* Adjust for smaller dice */
+    }
+    .face {
+        width: 120px;
+        height: 120px;
+        padding: 12px;
+    }
+    .front, .back, .right, .left, .top, .bottom {
+        transform-origin: 50% 50% -60px; /* Adjust transform origin */
+    }
+    .front  { transform: rotateY(  0deg) translateZ(60px); }
+    .back   { transform: rotateY(180deg) translateZ(60px); }
+    .right  { transform: rotateY( 90deg) translateZ(60px); }
+    .left   { transform: rotateY(-90deg) translateZ(60px); }
+    .top    { transform: rotateX( 90deg) translateZ(60px); }
+    .bottom { transform: rotateX(-90deg) translateZ(60px); }
+
+    .dot {
+        width: 22px;
+        height: 22px;
+    }
+
+    .roll-button {
+        bottom: 30px;
+        padding: 12px 30px;
+        font-size: 18px;
+        border-radius: 25px;
+    }
+}
